@@ -37,7 +37,8 @@ export class SchedulerComponent implements OnInit {
   cronDraft     = '';
   cronError     = '';
 
-  isAdmin = false;
+  isAdmin      = false;
+  searchFocused = false;
 
   constructor(
     private svc:    SchedulerService,

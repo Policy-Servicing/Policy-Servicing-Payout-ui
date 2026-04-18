@@ -5,8 +5,8 @@
     "ng": "ng",
     "postinstall": "node scripts/patch-http-deceiver.js",
     "start": "set NODE_OPTIONS=--openssl-legacy-provider && ng serve",
-    "build": "node -e \"process.env.NODE_OPTIONS='--openssl-legacy-provider'\" && ng build",
-    "build:prod": "node -e \"process.env.NODE_OPTIONS='--openssl-legacy-provider'\" && ng build --prod",
+    "build": "node scripts/build.js",
+    "build:prod": "node scripts/build.js --prod",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"
