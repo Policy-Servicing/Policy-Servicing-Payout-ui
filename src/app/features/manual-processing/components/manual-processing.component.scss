@@ -115,29 +115,31 @@ $border:  #E2E8F0;
   border-radius: 12px !important;
   box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
   border: 1px solid $border;
+  max-width: 900px; /* Prevent it from stretching across ultra-wide monitors */
 
   .lookup-row {
     display: flex;
-    align-items: flex-start;
-    gap: 16px;
+    align-items: baseline; /* Align the text baseline of inputs with the button */
+    gap: 20px;
     flex-wrap: wrap;
   }
 
   .lookup-field {
     flex: 1;
-    min-width: 200px;
+    min-width: 220px;
+    max-width: 320px; /* Stop the fields from bloating fully on wide screens */
   }
 
   .search-btn {
-    margin-top: 4px;
-    height: 40px;
+    height: 44px; /* A bit taller for a primary action */
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 0 20px;
+    padding: 0 24px;
+    font-weight: 600;
 
     .btn-spinner { margin-right: 4px; }
-    mat-icon { font-size: 18px; }
+    mat-icon { font-size: 20px; }
   }
 }
 
