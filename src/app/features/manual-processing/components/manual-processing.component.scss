@@ -1,0 +1,341 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+// ── Design tokens ────────────────────────────────────────────────────────────
+$teal:    #0EA5A0;
+$navy:    #1A2B4C;
+$text:    #1E293B;
+$muted:   #64748B;
+$light:   #F8FAFC;
+$border:  #E2E8F0;
+
+// ── Page wrapper ─────────────────────────────────────────────────────────────
+.mp-page {
+  position: relative;
+  padding: 28px 32px;
+  font-family: 'Inter', sans-serif;
+  min-height: 100%;
+}
+
+// ── Fullscreen overlay ────────────────────────────────────────────────────────
+.processing-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .overlay-inner {
+    background: #fff;
+    border-radius: 14px;
+    padding: 36px 48px;
+    text-align: center;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.18);
+
+    p {
+      margin-top: 18px;
+      font-size: 14px;
+      color: $muted;
+    }
+  }
+}
+
+// ── Page header ──────────────────────────────────────────────────────────────
+.page-header {
+  margin-bottom: 24px;
+
+  .page-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: $text;
+    margin: 0 0 4px;
+  }
+
+  .page-sub {
+    font-size: 13px;
+    color: $muted;
+    margin: 0;
+  }
+}
+
+// ── Tabs ─────────────────────────────────────────────────────────────────────
+.mp-tabs {
+  ::ng-deep .mat-tab-label { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 13px; }
+  ::ng-deep .mat-ink-bar   { background-color: $teal; height: 3px; }
+}
+
+.tab-content {
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// ── No permission ─────────────────────────────────────────────────────────────
+.no-permission {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+  color: $muted;
+  font-size: 14px;
+
+  mat-icon { color: #CBD5E1; }
+}
+
+// ── Recent chips row ──────────────────────────────────────────────────────────
+.recent-chips {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: -8px;
+
+  .recent-label {
+    font-size: 12px;
+    color: $muted;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .recent-chip {
+    cursor: pointer;
+    font-size: 12px;
+    background: rgba(14, 165, 160, 0.08) !important;
+    color: $teal !important;
+    font-weight: 600;
+    transition: background 0.15s;
+
+    &:hover { background: rgba(14, 165, 160, 0.18) !important; }
+  }
+}
+
+// ── Lookup card ───────────────────────────────────────────────────────────────
+.lookup-card {
+  border-radius: 12px !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+  border: 1px solid $border;
+
+  .lookup-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .lookup-field {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .search-btn {
+    margin-top: 4px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 20px;
+
+    .btn-spinner { margin-right: 4px; }
+    mat-icon { font-size: 18px; }
+  }
+}
+
+// ── Lookup error ──────────────────────────────────────────────────────────────
+.lookup-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: 8px;
+  color: #B91C1C;
+  font-size: 13px;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
+
+// ── Detail card ───────────────────────────────────────────────────────────────
+.detail-card {
+  border-radius: 12px !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+  border: 1px solid $border;
+
+  .detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    h2 { font-size: 16px; font-weight: 700; color: $text; margin: 0; }
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px 24px;
+
+    @media (max-width: 760px) { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 500px) { grid-template-columns: 1fr; }
+  }
+
+  .detail-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+
+    .cell-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: $muted;
+    }
+
+    .cell-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: $text;
+    }
+
+    .cell-value.amount {
+      font-size: 15px;
+      font-weight: 700;
+      color: $teal;
+    }
+  }
+
+  .paid-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 12px 16px;
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    border-radius: 8px;
+    color: #1D4ED8;
+    font-size: 13px;
+
+    mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  }
+}
+
+// ── Stage badges ──────────────────────────────────────────────────────────────
+.stage-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badge-extract     { background: #EFF6FF; color: #1D4ED8; }
+.badge-approve     { background: #EEF2FF; color: #4338CA; }
+.badge-techbucket  { background: #FFFBEB; color: #B45309; }
+.badge-sanction    { background: #FFF7ED; color: #C2410C; }
+.badge-paid        { background: #F0FDF4; color: #15803D; }
+
+// ── Timeline card ─────────────────────────────────────────────────────────────
+.timeline-card {
+  border-radius: 12px !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+  border: 1px solid $border;
+
+  h2 { font-size: 16px; font-weight: 700; color: $text; margin: 0 0 20px; }
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .timeline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid $border;
+    transition: opacity 0.2s;
+
+    &:last-child { border-bottom: none; }
+  }
+
+  .timeline-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .stage-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: $text;
+  }
+
+  .stage-status {
+    font-size: 12px;
+    color: #0F6E56;
+  }
+
+  .stage-status.current { color: #185FA5; }
+  .stage-status.muted   { color: $muted; }
+}
+
+// ── Timeline dots ─────────────────────────────────────────────────────────────
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.timeline-dot-done    { background: #0F6E56; }
+.timeline-dot-current { background: #185FA5; }
+.timeline-dot-pending { background: #D3D1C7; }
+
+// ── Action card ───────────────────────────────────────────────────────────────
+.action-card {
+  border-radius: 12px !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+  border: 1px solid $border;
+}
+
+.warning-bar {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #FFFBEB;
+  border: 1px solid #F59E0B;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #92400E;
+  margin-bottom: 20px;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; color: #D97706; flex-shrink: 0; margin-top: 1px; }
+
+  code {
+    font-family: monospace;
+    background: rgba(0,0,0,0.06);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+  }
+}
+
+.remarks-row {
+  .remarks-field { width: 100%; }
+  .char-count { font-size: 11px; color: $muted; text-align: right; margin-top: -12px; margin-bottom: 16px; }
+}
+
+.action-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+
+  button { display: flex; align-items: center; gap: 6px; }
+}

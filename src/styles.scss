@@ -1,0 +1,140 @@
+@import '~@angular/material/theming';
+@include mat-core();
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+// ─── Custom Angular Material Theme ───
+$ps-primary: mat-palette($mat-indigo, 700);
+$ps-accent:  mat-palette($mat-teal,   600);
+$ps-warn:    mat-palette($mat-deep-orange, 400);
+$ps-theme:   mat-light-theme($ps-primary, $ps-accent, $ps-warn);
+@include angular-material-theme($ps-theme);
+
+// ─── Global Reset & Base ───
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  background: #F0F4F8;
+  color: #1E293B;
+  -webkit-font-smoothing: antialiased;
+}
+
+// ─── Custom Scrollbar ───
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #F1F5F9; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+
+
+// ─── Mat Input overrides ───
+.mat-input-element {
+  font-family: 'Inter', sans-serif !important;
+  font-size: 13px !important;
+  color: #1E293B !important;
+}
+
+// ─── Buttons ───
+.mat-raised-button, .mat-flat-button { border-radius: 8px !important; }
+.mat-stroked-button { border-radius: 8px !important; }
+
+.mat-stroked-button:not([disabled]) {
+  border-color: #CBD5E1 !important;
+  color: #475569 !important;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  &:hover {
+    background: #F8FAFC !important;
+    border-color: #94A3B8 !important;
+    color: #1E293B !important;
+  }
+}
+
+.mat-icon-button {
+  color: #64748B !important;
+  transition: color 0.15s, background 0.15s !important;
+  &:hover { color: #1E293B !important; background: #F1F5F9 !important; }
+}
+
+// ─── Dialog ───
+.mat-dialog-container {
+  border-radius: 14px !important;
+  padding: 0 !important;
+  box-shadow: 0 16px 64px rgba(0,0,0,0.15) !important;
+  overflow: hidden !important;
+}
+
+// ─── Menu ───
+.mat-menu-panel {
+  border-radius: 10px !important;
+  min-width: 180px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important;
+  border: 1px solid #E2E8F0 !important;
+}
+.mat-menu-item { font-family: 'Inter', sans-serif !important; font-size: 13px !important; }
+
+// ─── Snackbar ───
+.success-snack { background: #DCFCE7 !important; .mat-simple-snackbar { color: #166534; } }
+.error-snack   { background: #FEE2E2 !important; .mat-simple-snackbar { color: #991B1B; } }
+.mat-snack-bar-container { border-radius: 10px !important; }
+
+// ─── Progress Bar ───
+.mat-progress-bar { height: 3px !important; }
+
+// ─── Slide Toggle ───
+.mat-slide-toggle.mat-checked .mat-slide-toggle-thumb { background-color: #0EA5A0 !important; }
+.mat-slide-toggle.mat-checked .mat-slide-toggle-bar   { background-color: rgba(14,165,160,0.38) !important; }
+
+// ─── mat-divider ───
+.mat-divider { border-top-color: #E2E8F0 !important; }
+
+// ─── Table ───
+.mat-table {
+  font-family: 'Inter', sans-serif !important;
+  background: transparent !important;
+}
+.mat-header-cell { font-family: 'Inter', sans-serif !important; }
+.mat-cell        { font-family: 'Inter', sans-serif !important; }
+
+// ─── Paginator ───
+.mat-paginator {
+  font-family: 'Inter', sans-serif !important;
+  border-top: 1px solid #F1F5F9;
+  background: transparent !important;
+}
+.mat-paginator-container { font-size: 12px !important; }
+
+// ─── Chip ───
+.mat-chip { border-radius: 6px !important; }
+
+// ─── Page Transition ───
+router-outlet + * {
+  animation: pageEnter 0.2s ease both;
+}
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ─── Tooltip ───
+.mat-tooltip {
+  font-size: 11px !important;
+  font-family: 'Inter', sans-serif !important;
+  border-radius: 6px !important;
+  background: #1E293B !important;
+}
+
+// ─── Badge ───
+.mat-badge-content { font-family: 'Inter', sans-serif !important; }
+
+// ─── Manual Processing — global snackbar panel classes ───
+// These MUST live in global styles.scss because MatSnackBar renders at the root overlay level
+.snack-success .mat-simple-snackbar       { color: #fff !important; }
+.snack-success                            { background: #0F6E56 !important; }
+.snack-error   .mat-simple-snackbar       { color: #fff !important; }
+.snack-error                              { background: #B91C1C !important; }

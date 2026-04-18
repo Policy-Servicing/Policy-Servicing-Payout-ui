@@ -1,0 +1,268 @@
+<div class="mp-page">
+
+  <!-- ── Fullscreen processing overlay ─────────────────────────────────── -->
+  <div class="processing-overlay" *ngIf="processing">
+    <div class="overlay-inner">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Processing policy — please wait…</p>
+    </div>
+  </div>
+
+  <!-- ── Page header ────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Manual Processing</h1>
+      <p class="page-sub">Look up a stuck policy and force-trigger auto-payout</p>
+    </div>
+  </div>
+
+  <!-- ── Tabs ───────────────────────────────────────────────────────────── -->
+  <mat-tab-group
+    [(selectedIndex)]="activeTabIndex"
+    animationDuration="200ms"
+    class="mp-tabs">
+
+    <!-- ══ TAB 1 — APPROVE ════════════════════════════════════════════════ -->
+    <mat-tab label="Approve" [disabled]="!canApprove">
+      <div class="tab-content" *ngIf="canApprove; else noPermission">
+        <ng-container *ngTemplateOutlet="searchSection"></ng-container>
+        <ng-container *ngTemplateOutlet="detailSection"></ng-container>
+        <ng-container *ngTemplateOutlet="timelineSection"></ng-container>
+        <ng-container *ngTemplateOutlet="actionSection"></ng-container>
+      </div>
+    </mat-tab>
+
+    <!-- ══ TAB 2 — SANCTION ═══════════════════════════════════════════════ -->
+    <mat-tab label="Sanction" [disabled]="!canSanction">
+      <div class="tab-content" *ngIf="canSanction; else noPermission">
+        <ng-container *ngTemplateOutlet="searchSection"></ng-container>
+        <ng-container *ngTemplateOutlet="detailSection"></ng-container>
+        <ng-container *ngTemplateOutlet="timelineSection"></ng-container>
+        <ng-container *ngTemplateOutlet="actionSection"></ng-container>
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
+
+  <!-- ── No-permission message ────────────────────────────────────────── -->
+  <ng-template #noPermission>
+    <div class="no-permission">
+      <mat-icon>lock</mat-icon>
+      <p>You do not have permission to perform this action.</p>
+    </div>
+  </ng-template>
+
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+  <!-- SHARED TEMPLATES (rendered inside each tab via ng-template)         -->
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+
+  <!-- ── Section 1: Policy Lookup ─────────────────────────────────────── -->
+  <ng-template #searchSection>
+
+    <!-- Recent lookups chips -->
+    <div class="recent-chips" *ngIf="recentLookups.length > 0">
+      <span class="recent-label">Recent:</span>
+      <mat-chip-list>
+        <mat-chip
+          *ngFor="let entry of recentLookups"
+          (click)="onRecentChipClick(entry)"
+          class="recent-chip">
+          {{ entry.policyNo }}
+        </mat-chip>
+      </mat-chip-list>
+    </div>
+
+    <!-- Lookup card -->
+    <mat-card class="lookup-card">
+      <mat-card-content>
+        <div class="lookup-row" [formGroup]="lookupForm">
+          <!-- Policy Number -->
+          <mat-form-field class="lookup-field">
+            <mat-label>Policy Number</mat-label>
+            <input matInput
+                   formControlName="policyNo"
+                   placeholder="e.g. PLY-SB-001234"
+                   (keyup.enter)="onEnter()">
+            <mat-error *ngIf="lookupForm.get('policyNo').touched && lookupForm.get('policyNo').hasError('required')">
+              This field is required
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Request ID -->
+          <mat-form-field class="lookup-field">
+            <mat-label>Request ID</mat-label>
+            <input matInput
+                   formControlName="requestId"
+                   placeholder="e.g. REQ-2024-56789"
+                   (keyup.enter)="onEnter()">
+            <mat-error *ngIf="lookupForm.get('requestId').touched && lookupForm.get('requestId').hasError('required')">
+              This field is required
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Search button -->
+          <button mat-raised-button
+                  color="primary"
+                  class="search-btn"
+                  [disabled]="loading"
+                  (click)="onSearch()">
+            <mat-spinner *ngIf="loading" diameter="18" mode="indeterminate" class="btn-spinner"></mat-spinner>
+            <mat-icon *ngIf="!loading">search</mat-icon>
+            {{ loading ? 'Searching…' : 'Search' }}
+          </button>
+        </div>
+
+        <!-- Lookup errors -->
+        <div class="lookup-error" *ngIf="lookupError">
+          <mat-icon>error_outline</mat-icon>
+          {{ lookupError }}
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </ng-template>
+
+  <!-- ── Section 2: Policy Details ─────────────────────────────────────── -->
+  <ng-template #detailSection>
+    <mat-card class="detail-card" *ngIf="policyDetail">
+      <mat-card-content>
+        <!-- Card header -->
+        <div class="detail-header">
+          <h2>Policy Details</h2>
+          <span class="stage-badge" [ngClass]="badgeClass(policyDetail.currentStage)">
+            {{ policyDetail.currentStage }}
+          </span>
+        </div>
+
+        <!-- Detail grid -->
+        <div class="detail-grid">
+          <div class="detail-cell">
+            <span class="cell-label">Policy Number</span>
+            <span class="cell-value">{{ policyDetail.policyNo }}</span>
+          </div>
+          <div class="detail-cell">
+            <span class="cell-label">Request ID</span>
+            <span class="cell-value">{{ policyDetail.requestId }}</span>
+          </div>
+          <div class="detail-cell">
+            <span class="cell-label">Module</span>
+            <span class="cell-value">{{ policyDetail.moduleName }}</span>
+          </div>
+
+          <div class="detail-cell">
+            <span class="cell-label">Customer Name</span>
+            <span class="cell-value">{{ policyDetail.customerName }}</span>
+          </div>
+          <div class="detail-cell">
+            <span class="cell-label">Product ID</span>
+            <span class="cell-value">{{ policyDetail.productId }}</span>
+          </div>
+          <div class="detail-cell">
+            <span class="cell-label">Payout Amount</span>
+            <span class="cell-value amount">
+              ₹{{ policyDetail.payoutAmount | number:'1.0-0' }}
+            </span>
+          </div>
+
+          <div class="detail-cell">
+            <span class="cell-label">Date of Commencement</span>
+            <span class="cell-value">{{ policyDetail.dateOfCommencement | date:'dd MMM yyyy' }}</span>
+          </div>
+          <div class="detail-cell">
+            <span class="cell-label">Maturity Date</span>
+            <span class="cell-value">{{ policyDetail.maturityDate | date:'dd MMM yyyy' }}</span>
+          </div>
+          <div class="detail-cell">
+            <span class="cell-label">Current Stage</span>
+            <span class="cell-value">{{ policyDetail.currentStage }}</span>
+          </div>
+        </div>
+
+        <!-- Paid banner -->
+        <div class="paid-banner" *ngIf="policyDetail.currentStage === 'PAID'">
+          <mat-icon>info</mat-icon>
+          This policy has already been paid. No further action required.
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </ng-template>
+
+  <!-- ── Section 3: Stage History Timeline ──────────────────────────────── -->
+  <ng-template #timelineSection>
+    <mat-card class="timeline-card"
+              *ngIf="policyDetail && policyDetail.currentStage !== 'PAID'">
+      <mat-card-content>
+        <h2>Stage History</h2>
+        <div class="timeline">
+          <div class="timeline-item"
+               *ngFor="let stage of policyDetail.stageHistory"
+               [style.opacity]="stageOpacity(stage.status)">
+            <div [ngClass]="stageDotClass(stage.status)"></div>
+            <div class="timeline-info">
+              <span class="stage-name">{{ stage.stageName }}</span>
+              <span class="stage-status" *ngIf="stage.status === 'COMPLETED'">
+                Completed · {{ stage.completedAt | date:'dd MMM yyyy, hh:mm a' }}
+              </span>
+              <span class="stage-status current" *ngIf="stage.status === 'CURRENT'">
+                Awaiting action · Pending for {{ daysAgo(stage.entryDate) }} day(s)
+              </span>
+              <span class="stage-status muted" *ngIf="stage.status === 'PENDING'">
+                Not started
+              </span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </ng-template>
+
+  <!-- ── Section 4: Confirm Action ──────────────────────────────────────── -->
+  <ng-template #actionSection>
+    <mat-card class="action-card"
+              *ngIf="policyDetail && policyDetail.currentStage !== 'PAID'">
+      <mat-card-content>
+        <!-- Warning bar -->
+        <div class="warning-bar">
+          <mat-icon>warning_amber</mat-icon>
+          <span>
+            This action will call
+            <code>customer.azbj_pkg_sb.auto_approve_validation</code>
+            — this cannot be undone.
+          </span>
+        </div>
+
+        <!-- Remarks -->
+        <div class="remarks-row">
+          <mat-form-field class="remarks-field">
+            <mat-label>Remarks (optional)</mat-label>
+            <textarea matInput
+                      [formControl]="remarks"
+                      rows="3"
+                      maxlength="200"
+                      placeholder="Enter any remarks…"></textarea>
+          </mat-form-field>
+          <div class="char-count">{{ remarks.value ? remarks.value.length : 0 }}/200</div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="action-btns">
+          <button mat-stroked-button (click)="resetForm()">Cancel</button>
+          <button mat-raised-button
+                  color="primary"
+                  *ngIf="activeTabIndex === 0"
+                  (click)="onConfirm()">
+            <mat-icon>check_circle</mat-icon>
+            Confirm Approve
+          </button>
+          <button mat-raised-button
+                  color="accent"
+                  *ngIf="activeTabIndex === 1"
+                  (click)="onConfirm()">
+            <mat-icon>gavel</mat-icon>
+            Confirm Sanction
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </ng-template>
+
+</div>

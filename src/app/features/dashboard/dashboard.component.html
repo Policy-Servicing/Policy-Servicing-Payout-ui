@@ -1,0 +1,190 @@
+<div class="dashboard-page">
+
+  <!-- ─── Filter Bar ─── -->
+  <div class="filter-bar">
+
+    <!-- Module Select -->
+    <div class="filter-group">
+      <label class="filter-label">Module</label>
+      <div class="select-wrap">
+        <mat-icon class="select-icon">category</mat-icon>
+        <select [(ngModel)]="selectedModule" (ngModelChange)="onModuleChange()">
+          <option *ngFor="let m of modules" [value]="m.code">{{ m.name }}</option>
+        </select>
+        <mat-icon class="select-chevron">expand_more</mat-icon>
+      </div>
+    </div>
+
+    <!-- Product Select -->
+    <div class="filter-group">
+      <label class="filter-label">Product</label>
+      <div class="select-wrap">
+        <mat-icon class="select-icon">inventory_2</mat-icon>
+        <select [(ngModel)]="selectedProduct" (ngModelChange)="onProductChange()">
+          <option value="">All Products</option>
+          <option *ngFor="let p of products" [value]="p.id">{{ p.id }} — {{ p.name }}</option>
+        </select>
+        <mat-icon class="select-chevron">expand_more</mat-icon>
+      </div>
+    </div>
+
+    <!-- Date Range Select -->
+    <div class="filter-group">
+      <label class="filter-label">Date Range</label>
+      <div class="select-wrap">
+        <mat-icon class="select-icon">date_range</mat-icon>
+        <select [(ngModel)]="selectedDate" (ngModelChange)="onDateChange()">
+          <option *ngFor="let d of dateOptions" [value]="d.value">{{ d.label }}</option>
+        </select>
+        <mat-icon class="select-chevron">expand_more</mat-icon>
+      </div>
+    </div>
+
+    <div class="filter-spacer"></div>
+
+    <!-- Refresh -->
+    <div class="filter-actions">
+      <app-countdown-timer [seconds]="refreshSeconds"></app-countdown-timer>
+      <button class="refresh-btn" (click)="loadData()">
+        <mat-icon [class.spinning]="loading">refresh</mat-icon>
+        <span>Refresh</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── Summary Bar ─── -->
+  <div class="summary-bar" *ngIf="summary">
+    <div class="summary-stat">
+      <div class="stat-icon teal"><mat-icon>assignment</mat-icon></div>
+      <div class="stat-body">
+        <span class="stat-label">Total Pending</span>
+        <span class="stat-value">{{ summary.totalPending | number }}</span>
+      </div>
+    </div>
+    <div class="summary-stat">
+      <div class="stat-icon teal"><mat-icon>account_balance_wallet</mat-icon></div>
+      <div class="stat-body">
+        <span class="stat-label">Amount in Pipeline</span>
+        <span class="stat-value">₹{{ summary.totalAmount | number:'1.0-0' }}</span>
+      </div>
+    </div>
+    <div class="summary-stat">
+      <div class="stat-icon orange"><mat-icon>warning_amber</mat-icon></div>
+      <div class="stat-body">
+        <span class="stat-label">SLA Breaches</span>
+        <span class="stat-value warn">{{ summary.slaBreaches }}</span>
+      </div>
+    </div>
+    <div class="summary-stat">
+      <div class="stat-icon slate"><mat-icon>update</mat-icon></div>
+      <div class="stat-body">
+        <span class="stat-label">Last Updated</span>
+        <span class="stat-value small">{{ summary.lastUpdated | relativeTime }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Loading Skeleton ─── -->
+  <div class="stage-grid" *ngIf="loading && !summary">
+    <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5]"></div>
+  </div>
+
+  <!-- ─── Stage Cards ─── -->
+  <div class="stage-grid" *ngIf="summary">
+    <app-stage-card
+      *ngFor="let card of summary.stageCounts"
+      [card]="card"
+      (click)="openDrillDown(card)">
+    </app-stage-card>
+
+    <!-- Total Pending Summary Card -->
+    <div class="total-summary-card">
+      <div class="ts-icon"><mat-icon>pending_actions</mat-icon></div>
+      <div class="ts-count">{{ summary.totalPending | number }}</div>
+      <div class="ts-label">Total Pending</div>
+      <div class="ts-sub">
+        <mat-icon>layers</mat-icon>
+        <span>All stages combined</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Trend Chart ─── -->
+  <div class="chart-section" *ngIf="trendData.length">
+    <div class="section-header">
+      <div class="section-title">
+        <mat-icon>show_chart</mat-icon>
+        <h3>7-Day Stage Trend</h3>
+      </div>
+      <span class="module-badge">{{ selectedModule }}</span>
+    </div>
+    <div class="chart-wrapper">
+      <app-trend-chart [data]="trendData"></app-trend-chart>
+    </div>
+  </div>
+
+</div>
+
+<!-- ─── Drill-down Overlay + Drawer ─── -->
+<div class="drill-overlay" *ngIf="drillOpen" (click)="drillOpen = false"></div>
+<div class="drill-drawer" [class.open]="drillOpen">
+
+  <div class="drill-header">
+    <div>
+      <h3>{{ drillStageLabel }} Records</h3>
+      <span class="drill-meta">{{ selectedModule }}&nbsp;·&nbsp;<strong>{{ drillTotalCount | number }}</strong> policies</span>
+    </div>
+    <div class="drill-actions">
+      <button class="export-btn" (click)="exportExcel()">
+        <mat-icon>download</mat-icon> Export Excel
+      </button>
+      <button mat-icon-button (click)="drillOpen = false">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="drill-table-wrap">
+    <table mat-table [dataSource]="drillRecords" class="drill-table">
+      <ng-container matColumnDef="policyNo">
+        <th mat-header-cell *matHeaderCellDef>Policy No</th>
+        <td mat-cell *matCellDef="let r" class="mono">{{ r.policyNo }}</td>
+      </ng-container>
+      <ng-container matColumnDef="holderName">
+        <th mat-header-cell *matHeaderCellDef>Holder</th>
+        <td mat-cell *matCellDef="let r">{{ r.holderName }}</td>
+      </ng-container>
+      <ng-container matColumnDef="productId">
+        <th mat-header-cell *matHeaderCellDef>Product</th>
+        <td mat-cell *matCellDef="let r"><code>{{ r.productId }}</code></td>
+      </ng-container>
+      <ng-container matColumnDef="amount">
+        <th mat-header-cell *matHeaderCellDef>Amount (₹)</th>
+        <td mat-cell *matCellDef="let r" class="amount">{{ r.amount | number:'1.2-2' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="agingDays">
+        <th mat-header-cell *matHeaderCellDef>Aging</th>
+        <td mat-cell *matCellDef="let r">
+          <span class="aging-tag" [class.aged]="r.agingDays > 3">{{ r.agingDays }}d</span>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let r"><app-badge [status]="r.status"></app-badge></td>
+      </ng-container>
+      <ng-container matColumnDef="enteredAt">
+        <th mat-header-cell *matHeaderCellDef>Entered</th>
+        <td mat-cell *matCellDef="let r">{{ r.enteredAt | relativeTime }}</td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="drillCols; sticky: true"></tr>
+      <tr mat-row *matRowDef="let r; columns: drillCols;" class="drill-row"></tr>
+    </table>
+  </div>
+
+  <mat-paginator
+    [length]="drillTotalCount"
+    [pageSize]="drillSize"
+    [pageSizeOptions]="[10, 20, 50]"
+    (page)="onDrillPageChange($event)">
+  </mat-paginator>
+</div>

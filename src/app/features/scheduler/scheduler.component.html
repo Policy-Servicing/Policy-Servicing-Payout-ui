@@ -1,0 +1,256 @@
+<div class="scheduler-page">
+
+  <!-- ─── Filters ─── -->
+  <div class="filter-bar">
+    <div class="filter-group stretch">
+      <label class="filter-label">Search</label>
+      <div class="search-wrap" [class.focused]="searchFocused">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input 
+          type="text" 
+          [(ngModel)]="filters.search" 
+          (ngModelChange)="applyFilters()" 
+          placeholder="Search schedulers..."
+          (focus)="searchFocused=true"
+          (blur)="searchFocused=false"
+        />
+        <button class="clear-btn" *ngIf="filters.search" (click)="filters.search=''; applyFilters()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Status</label>
+      <div class="select-wrap">
+        <mat-icon class="select-icon">flag</mat-icon>
+        <select [(ngModel)]="filters.status" (ngModelChange)="applyFilters()">
+          <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+        </select>
+        <mat-icon class="select-chevron">expand_more</mat-icon>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Module</label>
+      <div class="select-wrap">
+        <mat-icon class="select-icon">category</mat-icon>
+        <select [(ngModel)]="filters.moduleCode" (ngModelChange)="applyFilters()">
+          <option *ngFor="let m of moduleOptions" [value]="m">{{ moduleNames[m] }}</option>
+        </select>
+        <mat-icon class="select-chevron">expand_more</mat-icon>
+      </div>
+    </div>
+
+    <div class="results-count">
+      <strong>{{ filtered.length }}</strong> of {{ allSchedulers.length }} schedulers
+    </div>
+
+    <div class="filter-spacer"></div>
+
+    <button class="refresh-btn" (click)="load()">
+      <mat-icon>refresh</mat-icon> <span>Refresh</span>
+    </button>
+  </div>
+
+  <!-- ─── Table ─── -->
+  <div class="table-card">
+    <table mat-table [dataSource]="filtered" class="scheduler-table">
+
+      <!-- Name -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Scheduler Name</th>
+        <td mat-cell *matCellDef="let s" class="name-cell">
+          <div class="name-main">{{ s.name }}</div>
+          <div class="name-sub">{{ s.jobClass }}</div>
+        </td>
+      </ng-container>
+
+      <!-- Module -->
+      <ng-container matColumnDef="moduleCode">
+        <th mat-header-cell *matHeaderCellDef>Module</th>
+        <td mat-cell *matCellDef="let s">
+          <span class="module-chip">{{ s.moduleCode }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Status -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let s"><app-badge [status]="s.status"></app-badge></td>
+      </ng-container>
+
+      <!-- Last Run -->
+      <ng-container matColumnDef="lastRunTime">
+        <th mat-header-cell *matHeaderCellDef>Last Run</th>
+        <td mat-cell *matCellDef="let s">
+          <span *ngIf="s.lastRunTime">{{ s.lastRunTime | relativeTime }}</span>
+          <span *ngIf="!s.lastRunTime" class="muted">—</span>
+        </td>
+      </ng-container>
+
+      <!-- Next Run -->
+      <ng-container matColumnDef="nextRunTime">
+        <th mat-header-cell *matHeaderCellDef>Next Run</th>
+        <td mat-cell *matCellDef="let s">
+          <span *ngIf="s.nextRunTime && s.enabled">{{ s.nextRunTime | date:'HH:mm, dd MMM' }}</span>
+          <span *ngIf="!s.nextRunTime || !s.enabled" class="muted">—</span>
+        </td>
+      </ng-container>
+
+      <!-- Cron -->
+      <ng-container matColumnDef="cronExpression">
+        <th mat-header-cell *matHeaderCellDef>Frequency</th>
+        <td mat-cell *matCellDef="let s">
+          <span class="cron-human">{{ s.cronExpression | cronHuman }}</span>
+          <div class="cron-raw">{{ s.cronExpression }}</div>
+        </td>
+      </ng-container>
+
+      <!-- Records -->
+      <ng-container matColumnDef="recordsProcessed">
+        <th mat-header-cell *matHeaderCellDef>Records</th>
+        <td mat-cell *matCellDef="let s">
+          <span *ngIf="s.recordsProcessed">{{ s.recordsProcessed | number }}</span>
+          <span *ngIf="!s.recordsProcessed" class="muted">—</span>
+        </td>
+      </ng-container>
+
+      <!-- Duration -->
+      <ng-container matColumnDef="duration">
+        <th mat-header-cell *matHeaderCellDef>Duration</th>
+        <td mat-cell *matCellDef="let s">{{ formatDuration(s.durationMs) }}</td>
+      </ng-container>
+
+      <!-- Actions -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let s">
+          <div class="action-btns">
+            <button mat-icon-button matTooltip="View history" (click)="openHistory(s)">
+              <mat-icon>history</mat-icon>
+            </button>
+            <button mat-icon-button class="run-btn" matTooltip="Run now"
+              (click)="triggerNow(s, $event)" [disabled]="s.status === 'RUNNING'">
+              <mat-icon>play_arrow</mat-icon>
+            </button>
+            <mat-slide-toggle
+              *ngIf="isAdmin"
+              [checked]="s.enabled"
+              (change)="toggleScheduler(s, $event)"
+              [matTooltip]="s.enabled ? 'Disable' : 'Enable'"
+              color="accent"
+              class="custom-toggle"
+              (click)="$event.stopPropagation()">
+            </mat-slide-toggle>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let r; columns: columns;"
+        class="sched-row" (click)="openHistory(r)"></tr>
+    </table>
+
+    <div class="empty-state" *ngIf="filtered.length === 0">
+      <div class="empty-icon"><mat-icon>search_off</mat-icon></div>
+      <p>No schedulers match your filters</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ─── History Drawer ─── -->
+<div class="drawer-overlay" *ngIf="historyOpen" (click)="historyOpen = false"></div>
+<div class="history-drawer" [class.open]="historyOpen">
+  <ng-container *ngIf="selectedScheduler">
+    <div class="drawer-header">
+      <div>
+        <h3>{{ selectedScheduler.name }}</h3>
+        <div class="drawer-meta">
+          <span class="module-chip">{{ selectedScheduler.moduleCode }}</span>
+          <app-badge [status]="selectedScheduler.status"></app-badge>
+          <span class="muted-text">{{ selectedScheduler.jobClass }}</span>
+        </div>
+      </div>
+      <button mat-icon-button (click)="historyOpen = false"><mat-icon>close</mat-icon></button>
+    </div>
+
+    <!-- Error alert -->
+    <div class="error-alert" *ngIf="selectedScheduler.errorMessage">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ selectedScheduler.errorMessage }}</span>
+    </div>
+
+    <!-- Cron Editor -->
+    <div class="cron-editor-section">
+      <div class="cron-row" *ngIf="!editingCron">
+        <div class="cron-display">
+          <div class="cron-label">Schedule</div>
+          <div class="cron-value">{{ selectedScheduler.cronExpression | cronHuman }}</div>
+          <code class="cron-raw-code">{{ selectedScheduler.cronExpression }}</code>
+        </div>
+        <button class="edit-cron-btn" *ngIf="isAdmin" (click)="editingCron = true; cronDraft = selectedScheduler.cronExpression">
+          <mat-icon>edit</mat-icon> Edit
+        </button>
+      </div>
+      
+      <div class="cron-edit-row" *ngIf="editingCron">
+        <label class="filter-label">Update Cron Expression</label>
+        <div class="search-wrap" [class.has-error]="cronError">
+          <input type="text" [(ngModel)]="cronDraft" placeholder="0 0 6 * * ?" />
+        </div>
+        <div class="field-error" *ngIf="cronError">⚠ {{ cronError }}</div>
+        
+        <div class="cron-preview" *ngIf="cronDraft && !cronError">Preview: {{ cronDraft | cronHuman }}</div>
+        
+        <div class="cron-edit-actions">
+          <button class="cancel-btn" (click)="editingCron = false">Cancel</button>
+          <button class="save-btn" (click)="saveCron()">Save Schedule</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="history-divider"></div>
+
+    <!-- Run History -->
+    <div class="history-section">
+      <h4>Run History</h4>
+      <table mat-table [dataSource]="runHistory" class="history-table">
+        <ng-container matColumnDef="runTime">
+          <th mat-header-cell *matHeaderCellDef>Run Time</th>
+          <td mat-cell *matCellDef="let h">{{ h.runTime | relativeTime }}</td>
+        </ng-container>
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Result</th>
+          <td mat-cell *matCellDef="let h"><app-badge [status]="h.status"></app-badge></td>
+        </ng-container>
+        <ng-container matColumnDef="recordsProcessed">
+          <th mat-header-cell *matHeaderCellDef>Records</th>
+          <td mat-cell *matCellDef="let h">{{ h.recordsProcessed | number }}</td>
+        </ng-container>
+        <ng-container matColumnDef="duration">
+          <th mat-header-cell *matHeaderCellDef>Duration</th>
+          <td mat-cell *matCellDef="let h">{{ formatDuration(h.durationMs) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="triggeredBy">
+          <th mat-header-cell *matHeaderCellDef>Triggered By</th>
+          <td mat-cell *matCellDef="let h">
+            <span class="trigger-badge" [class.manual]="h.triggeredBy === 'MANUAL'">{{ h.triggeredBy }}</span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="errorMessage">
+          <th mat-header-cell *matHeaderCellDef>Error</th>
+          <td mat-cell *matCellDef="let h">
+            <span class="error-text" *ngIf="h.errorMessage" [matTooltip]="h.errorMessage">
+              <mat-icon>error_outline</mat-icon> See details
+            </span>
+            <span *ngIf="!h.errorMessage" class="muted">—</span>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="historyColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let r; columns: historyColumns;" class="history-row"></tr>
+      </table>
+    </div>
+  </ng-container>
+</div>

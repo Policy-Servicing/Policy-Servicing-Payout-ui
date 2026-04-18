@@ -1,0 +1,100 @@
+.stage-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  cursor: pointer;
+  position: relative;
+  border-top: 3px solid var(--card-color);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+  transition: transform 0.22s cubic-bezier(0.4,0,0.2,1),
+              box-shadow 0.22s cubic-bezier(0.4,0,0.2,1);
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0) 60%, var(--card-color));
+    opacity: 0;
+    border-radius: inherit;
+    transition: opacity 0.22s;
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.11);
+    &::after { opacity: 0.04; }
+  }
+  &:active { transform: translateY(-2px); }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+
+  .card-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--card-color) 12%, white);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s;
+
+    mat-icon {
+      color: var(--card-color);
+      font-size: 20px; width: 20px; height: 20px;
+    }
+  }
+
+  &:hover .card-icon { transform: scale(1.08); }
+
+  .card-badge {
+    display: flex; align-items: center; gap: 3px;
+    background: #FEF3C7; color: #92400E;
+    font-size: 10.5px; font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.2px;
+    animation: badgePulse 2.5s ease-in-out infinite;
+
+    .aging-icon { font-size: 11px; width: 11px; height: 11px; }
+  }
+
+  .card-count {
+    font-size: 34px;
+    font-weight: 800;
+    color: #1E293B;
+    line-height: 1;
+    margin-bottom: 4px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -1px;
+    transition: color 0.2s;
+  }
+
+  &:hover .card-count { color: var(--card-color); }
+
+  .card-label {
+    font-size: 11px; color: #94A3B8;
+    font-weight: 600;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .card-change {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; font-weight: 600;
+
+    mat-icon { font-size: 14px; width: 14px; height: 14px; }
+
+    &.up   { color: #16A34A; }
+    &.down { color: #DC2626; }
+    &.flat { color: #94A3B8; }
+  }
+}
+
+@keyframes badgePulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.75; }
+}
