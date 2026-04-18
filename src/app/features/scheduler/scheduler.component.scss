@@ -129,6 +129,7 @@
   border-radius: 12px;
   padding: 8px 0;
   box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  overflow-x: auto;
 
   .empty-state {
     display: flex; flex-direction: column; align-items: center;
@@ -146,6 +147,7 @@
 
 .scheduler-table {
   width: 100%;
+  min-width: 900px; /* guarantees columns won't squish too much, forces horizontal scroll */
 
   th.mat-header-cell {
     background: #F8FAFC;
