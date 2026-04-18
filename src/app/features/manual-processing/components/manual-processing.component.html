@@ -220,15 +220,7 @@
     <mat-card class="action-card"
               *ngIf="policyDetail && policyDetail.currentStage !== 'PAID'">
       <mat-card-content>
-        <!-- Warning bar -->
-        <div class="warning-bar">
-          <mat-icon>warning_amber</mat-icon>
-          <span>
-            This action will call
-            <code>customer.azbj_pkg_sb.auto_approve_validation</code>
-            — this cannot be undone.
-          </span>
-        </div>
+
 
         <!-- Remarks -->
         <div class="remarks-row">

@@ -306,28 +306,7 @@ $border:  #E2E8F0;
   border: 1px solid $border;
 }
 
-.warning-bar {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  background: #FFFBEB;
-  border: 1px solid #F59E0B;
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-size: 13px;
-  color: #92400E;
-  margin-bottom: 20px;
 
-  mat-icon { font-size: 18px; width: 18px; height: 18px; color: #D97706; flex-shrink: 0; margin-top: 1px; }
-
-  code {
-    font-family: monospace;
-    background: rgba(0,0,0,0.06);
-    padding: 1px 5px;
-    border-radius: 3px;
-    font-size: 12px;
-  }
-}
 
 .remarks-row {
   .remarks-field { width: 100%; }
