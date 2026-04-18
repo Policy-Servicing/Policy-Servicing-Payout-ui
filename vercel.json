@@ -1,0 +1,9 @@
+{
+  "buildCommand": "NODE_OPTIONS=--openssl-legacy-provider npx ng build --prod --output-hashing all",
+  "outputDirectory": "dist/policy-dashboard",
+  "installCommand": "npm install --legacy-peer-deps",
+  "framework": null,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
