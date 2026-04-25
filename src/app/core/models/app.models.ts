@@ -108,3 +108,18 @@ export interface SchedulerFilterState {
   status: SchedulerStatus | 'ALL';
   moduleCode: string;
 }
+
+// ───────────────────────── Audit Log (DB call log) ──────────────────────────
+
+/** Matches the PS_API_CALL_LOG table returned by GET /api/v1/dashboard/audit-logs */
+export interface AuditLog {
+  log_id:      number;
+  module_code: string | null;
+  proc_name:   string;
+  call_ts:     string;          // ISO timestamp string from Oracle
+  status:      'SUCCESS' | 'ERROR';
+  err_code:    string | null;
+  err_msg:     string | null;
+  exec_ms:     number | null;
+}
+

@@ -18,11 +18,11 @@ const MOCK_POLICY: PolicyDetail = {
   dateOfCommencement: new Date('2019-06-15'),
   maturityDate: new Date('2029-06-15'),
   stageHistory: [
-    { stageName: 'EXTRACT',     status: 'COMPLETED', completedAt: new Date('2024-04-10T06:30:00'), entryDate: new Date('2024-04-10T06:00:00') },
-    { stageName: 'APPROVE',     status: 'CURRENT',   completedAt: null,                            entryDate: new Date('2024-04-14T09:00:00') },
-    { stageName: 'TECH_BUCKET', status: 'PENDING',   completedAt: null,                            entryDate: null },
-    { stageName: 'SANCTION',    status: 'PENDING',   completedAt: null,                            entryDate: null },
-    { stageName: 'PAID',        status: 'PENDING',   completedAt: null,                            entryDate: null }
+    { stageName: 'EXTRACT', status: 'COMPLETED', completedAt: new Date('2024-04-10T06:30:00'), entryDate: new Date('2024-04-10T06:00:00') },
+    { stageName: 'APPROVE', status: 'CURRENT', completedAt: null, entryDate: new Date('2024-04-14T09:00:00') },
+    { stageName: 'TECH_BUCKET', status: 'PENDING', completedAt: null, entryDate: null },
+    { stageName: 'SANCTION', status: 'PENDING', completedAt: null, entryDate: null },
+    { stageName: 'PAID', status: 'PENDING', completedAt: null, entryDate: null }
   ]
 };
 
@@ -30,7 +30,7 @@ const MOCK_POLICY: PolicyDetail = {
 export class ManualProcessingService {
   private baseUrl = '/api/v1/manual-processing';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   lookupPolicy(policyNo: string, requestId: string): Observable<PolicyDetail> {
     if (environment.useMockData) {
