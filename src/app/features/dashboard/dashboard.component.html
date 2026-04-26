@@ -146,36 +146,32 @@
 
   <div class="drill-table-wrap">
     <table mat-table [dataSource]="drillRecords" class="drill-table">
-      <ng-container matColumnDef="policyNo">
-        <th mat-header-cell *matHeaderCellDef>Policy No</th>
-        <td mat-cell *matCellDef="let r" class="mono">{{ r.policyNo }}</td>
-      </ng-container>
-      <ng-container matColumnDef="holderName">
-        <th mat-header-cell *matHeaderCellDef>Holder</th>
-        <td mat-cell *matCellDef="let r">{{ r.holderName }}</td>
-      </ng-container>
-      <ng-container matColumnDef="productId">
-        <th mat-header-cell *matHeaderCellDef>Product</th>
-        <td mat-cell *matCellDef="let r"><code>{{ r.productId }}</code></td>
-      </ng-container>
-      <ng-container matColumnDef="amount">
-        <th mat-header-cell *matHeaderCellDef>Amount (₹)</th>
-        <td mat-cell *matCellDef="let r" class="amount">{{ r.amount | number:'1.2-2' }}</td>
-      </ng-container>
-      <ng-container matColumnDef="agingDays">
-        <th mat-header-cell *matHeaderCellDef>Aging</th>
-        <td mat-cell *matCellDef="let r">
-          <span class="aging-tag" [class.aged]="r.agingDays > 3">{{ r.agingDays }}d</span>
+      
+      <!-- Dynamic Columns Loop -->
+      <ng-container *ngFor="let col of drillCols" [matColumnDef]="col">
+        <th mat-header-cell *matHeaderCellDef> {{ toHeader(col) }} </th>
+        <td mat-cell *matCellDef="let r" [ngClass]="{'amount': col === 'amount', 'mono': col === 'policyNo' || col === 'POLICY_NO'}">
+          
+          <!-- Special formatting: Status Badge -->
+          <ng-container *ngIf="col === 'status' || col === 'STATUS'; else checkDate">
+            <app-badge [status]="r[col]"></app-badge>
+          </ng-container>
+
+          <!-- Special formatting: Date -->
+          <ng-template #checkDate>
+            <ng-container *ngIf="isDate(r[col]); else defaultCell">
+              {{ r[col] | date:'mediumDate' }}
+            </ng-container>
+          </ng-template>
+
+          <!-- Default Cell -->
+          <ng-template #defaultCell>
+            {{ r[col] }}
+          </ng-template>
+
         </td>
       </ng-container>
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef>Status</th>
-        <td mat-cell *matCellDef="let r"><app-badge [status]="r.status"></app-badge></td>
-      </ng-container>
-      <ng-container matColumnDef="enteredAt">
-        <th mat-header-cell *matHeaderCellDef>Entered</th>
-        <td mat-cell *matCellDef="let r">{{ r.enteredAt | relativeTime }}</td>
-      </ng-container>
+
       <tr mat-header-row *matHeaderRowDef="drillCols; sticky: true"></tr>
       <tr mat-row *matRowDef="let r; columns: drillCols;" class="drill-row"></tr>
     </table>
